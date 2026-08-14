@@ -19,8 +19,11 @@ Access at `http://localhost:5000`
 
 ### Command Line
 ```bash
+uv run python convert.py input.csv              # writes ynab_data_YYYYMMDD.csv next to the input
 uv run python convert.py -i input.csv -o output.csv
 ```
+The input may be given positionally or with `-i`. Without `-o`, the output lands
+in the input's folder as `ynab_data_{date}.csv`.
 
 ## Dependencies
 
@@ -32,10 +35,18 @@ uv run python convert.py -i input.csv -o output.csv
 
 The converter (`convert.py`):
 - Reads semicolon-separated CSV files
-- Auto-detects amount column (rightmost numeric column)
+- Auto-detects the date, payee, and amount columns rather than relying on their
+  position, so extra columns in a bank export don't break it
+- Ignores running-balance columns (detected by checking whether a numeric column
+  is the running total of another one) — these otherwise look like huge inflows
 - Splits amounts into Inflow/Outflow columns for YNAB
 - Handles European number formatting (comma as decimal separator)
+- Skips header rows and any row without a usable amount
 - Outputs properly quoted CSV files
+
+Known bank export layouts, both supported:
+- `date;text;amount;currency`
+- `date;text;amount;balance;currency`
 
 ## Web Interface
 
